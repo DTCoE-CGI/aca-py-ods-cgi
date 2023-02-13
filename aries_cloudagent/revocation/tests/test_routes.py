@@ -882,7 +882,6 @@ class TestRevocationRoutes(AsyncTestCase):
                 result = await test_module.set_rev_reg_state(self.request)
             mock_json_response.assert_not_called()
 
-
     async def test_register(self):
         mock_app = async_mock.MagicMock()
         mock_app.add_routes = async_mock.MagicMock()
@@ -924,7 +923,9 @@ class TestDeleteTails(unittest.TestCase):
         rev_reg_id = self.rev_reg_id
 
         # Test
-        result = await test_module.delete_tails({"context": None, "query": {"rev_reg_id": rev_reg_id}})
+        result = await test_module.delete_tails(
+            {"context": None, "query": {"rev_reg_id": rev_reg_id}}
+        )
 
         # Assert
         self.assertEqual(result, {"message": "All files deleted successfully"})
@@ -939,7 +940,9 @@ class TestDeleteTails(unittest.TestCase):
         os.makedirs(cred_dir)
 
         # Test
-        result = await test_module.delete_tails({"context": None, "query": {"cred_def_id": cred_def_id}})
+        result = await test_module.delete_tails(
+            {"context": None, "query": {"cred_def_id": cred_def_id}}
+        )
 
         # Assert
         self.assertEqual(result, {"message": "All files deleted successfully"})
@@ -951,7 +954,9 @@ class TestDeleteTails(unittest.TestCase):
         cred_def_id = "invalid_cred_def_id"
 
         # Test
-        result = await test_module.delete_tails({"context": None, "query": {"cred_def_id": cred_def_id}})
+        result = await test_module.delete_tails(
+            {"context": None, "query": {"cred_def_id": cred_def_id}}
+        )
 
         # Assert
         self.assertEqual(result, {"message": "No such file or directory"})
