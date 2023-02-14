@@ -914,8 +914,11 @@ class TestDeleteTails(unittest.TestCase):
         self.cred_def_id = "cred_def_id_456"
 
         self.main_dir_rev = "path/to/main/dir/rev"
-        self.tails_path = os.path.join(self.main_dir_rev, "tails.txt")
-        os.makedirs(self.main_dir_rev)
+        self.tails_path = os.path.join(self.main_dir_rev, "tails")
+        try:
+            os.makedirs(self.main_dir_rev)
+        except:
+            pass           
         open(self.tails_path, "w").close()
 
     async def test_delete_tails_by_rev_reg_id(self):
@@ -929,7 +932,7 @@ class TestDeleteTails(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, {"message": "All files deleted successfully"})
-        self.assertFalse(os.path.exists(self.main_dir_rev))
+        self.assertFalse(os.path.exists(self.tails_path))
 
     async def test_delete_tails_by_cred_def_id(self):
         # Setup

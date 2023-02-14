@@ -147,18 +147,24 @@ class CredRevRecordQueryStringSchema(OpenAPISchema):
         **UUID4,
     )
 
+
 class RevRegId(OpenAPISchema):
     """Parameters and validators for delete tails file request."""
 
     @validates_schema
     def validate_fields(self, data, **kwargs):
-        """Validate schema fields - must have (rr-id and cr-id) xor cx-id."""
+        """Validate schema fields - must have either rr-id or cr-id."""
 
         rev_reg_id = data.get("rev_reg_id")
         cred_def_id = data.get("cred_def_id")
 
+        if not (rev_reg_id or cred_def_id):
+            raise ValidationError("Request must have either rev_reg_id or cred_def_id")
+
     rev_reg_id = fields.Str(
-        description="Revocation registry identifier", required=False, **INDY_REV_REG_ID
+        description="Revocation registry identifier",
+        required=False,
+        **INDY_REV_REG_ID,
     )
     cred_def_id = fields.Str(
         description="Credential definition identifier",
@@ -1487,9 +1493,11 @@ async def on_revocation_registry_endorsed_event(profile: Profile, event: Event):
             endorser_connection_id=endorser_connection_id,
         )
 
+
 @querystring_schema(RevRegId())
 @docs(tags=["revocation"], summary="Delete the tail files")
 async def delete_tails(request: web.BaseRequest) -> json:
+    """Delete Tails Files."""
     context: AdminRequestContext = request["context"]
     rev_reg_id = request.query.get("rev_reg_id")
     cred_def_id = request.query.get("cred_def_id")
@@ -1587,6 +1595,7 @@ async def register(app: web.Application):
                 "/revocation/registry/{rev_reg_id}/fix-revocation-entry-state",
                 update_rev_reg_revoked_state,
             ),
+            web.delete("/revocation/registry/delete-tails-file", delete_tails),
         ]
     )
 
