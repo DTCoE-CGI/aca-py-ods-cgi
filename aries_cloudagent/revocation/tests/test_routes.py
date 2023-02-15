@@ -908,6 +908,7 @@ class TestRevocationRoutes(AsyncTestCase):
 
         assert "tags" in mock_app._state["swagger_dict"]
 
+
 class TestDeleteTails(unittest.TestCase):
     def setUp(self):
         self.rev_reg_id = "rev_reg_id_123"
@@ -915,10 +916,8 @@ class TestDeleteTails(unittest.TestCase):
 
         self.main_dir_rev = "path/to/main/dir/rev"
         self.tails_path = os.path.join(self.main_dir_rev, "tails")
-        try:
+        if not (os.path.exists(self.main_dir_rev)):
             os.makedirs(self.main_dir_rev)
-        except:
-            pass           
         open(self.tails_path, "w").close()
 
     async def test_delete_tails_by_rev_reg_id(self):
