@@ -1526,7 +1526,8 @@ async def delete_tails(request: web.BaseRequest) -> json:
         try:
             flag = 0
             for i in filenames:
-                if re.search(cred_def_id, i):
+                safe_cred_def_id = re.escape(cred_def_id)
+                if re.search(safe_cred_def_id, i):
                     shutil.rmtree(main_dir_cred + "/" + i)
                     flag = 1
             if flag:
