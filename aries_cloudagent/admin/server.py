@@ -27,6 +27,7 @@ from ..core.profile import Profile
 from ..ledger.error import LedgerConfigError, LedgerTransactionError
 from ..messaging.models.openapi import OpenAPISchema
 from ..messaging.responder import BaseResponder
+from aries_cloudagent.protocols.security.v1_0.secure import sign_secret
 from ..multitenant.base import BaseMultitenantManager, MultitenantManagerError
 from ..storage.error import StorageNotFoundError
 from ..transport.outbound.message import OutboundMessage
@@ -865,23 +866,22 @@ class AdminServer(BaseAdminServer):
     async def send_webhook(self, profile: Profile, topic: str, payload: dict = None):
         """Add a webhook to the queue, to send to all registered targets."""
         wallet_id = profile.settings.get("wallet.id")
+        # Fetching the secret key from the wallet record
+        secret_key = profile.settings.get("secret_key")
         webhook_urls = profile.settings.get("admin.webhook_urls")
-
-        metadata = None
+        metadata = {}
         if wallet_id:
             metadata = {"x-wallet-id": wallet_id}
 
         if self.webhook_router:
             for endpoint in webhook_urls:
                 self.webhook_router(
-                    topic,
-                    payload,
-                    endpoint,
-                    None,
-                    metadata,
+                    topic, payload, endpoint, None, metadata  # sign with secret
                 )
+                signed_secret = sign_secret(secret_key, payload)
+                metadata["ACAPY_Webhook_HMAC"] = signed_secret
 
-        # set ws webhook body, optionally add wallet id for multitenant mode
+        # Metadata is the header containing the signed secret
         webhook_body = {"topic": topic, "payload": payload}
         if wallet_id:
             webhook_body["wallet_id"] = wallet_id
